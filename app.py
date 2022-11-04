@@ -44,16 +44,26 @@ def home():
 
 @app.get('/registration/')
 def registration(username: str, password: str):
-    insert(username, password)
-    return "Succesful Registration"
+    if(len(password)<=8):
+        return {"message":"Invalid login: Password must be more than 8 characters"} 
+    else:
+        insert(username, password)
+        return {"message" :"Succesful Registration"}
+
     
 @app.get('/login/')
 def login(username: str, password : str):
-    res = download(username)
-    if(res["password"] == password):
-        return "Successful login"
+    check = collection.find_one({"username": username})
+    
+    if(str(type(check)) != "<class 'NoneType'>"):
+        res = download(username)
+        if(res["password"] != password ):
+            return {"message":"Invalid login: Password does not match"}    
+        
+        else:
+            return {"message":"Successful login"}
     else:
-        return "Invalid login"       
+       return {"message":"Username doesn't exist"}           
 
     
 @app.get('/get_favourites/')
@@ -61,7 +71,7 @@ def get_favourites(username: str):
     
     arr = download(username)
     if("favourites" not in arr.keys()):
-        return "Favourites don't exist"
+        return {"message":"Favourites don't exist"}
     else:
         return {"result": arr["favourites"]}
     
@@ -71,11 +81,13 @@ def update_favourites(username: str, fav: str ):
     update(username, fav)
     res = download(username)
     if(res["favourites"] == fav):
-        return "Successfully updated"
+        return {"message": "Successfully updated"}
     else:
-        return "Could not update"
+        return {"message":"Could not update"}
            
    
     
+
+
 
 
